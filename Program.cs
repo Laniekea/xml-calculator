@@ -1,4 +1,5 @@
 using System;
+using System.Xml.Linq;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,12 +18,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
-app.MapGet("/calculate", () =>
+app.MapPost("/calculate", (string xml) =>
 {
     try {
-        var result = "Ok";
+        var result = CalculateFromXml(xml);
         return Results.Ok(new { Result = result });    
     }
     catch (Exception ex) {
@@ -33,3 +32,37 @@ app.MapGet("/calculate", () =>
 .WithOpenApi();
 
 app.Run();
+
+double CalculateFromXml(string xml) 
+{
+    XDocument xmlDocument = XDocument.Parse(xml);
+    var operation = xmlDocument.Descendants().FirstOrDefault(e => e.Name.LocalName == "Operation");
+    return ProcessOperation(operation);
+}
+
+double ProcessOperation(XElement operationElement)
+{
+    string operationType = operationElement.Attribute("type").Value;
+
+    switch (operationType)
+    {
+        case "Addition":
+            return PerformAddition(operationElement);
+        case "Multiplication":
+            return PerformMultiplication(operationElement);
+        default:
+            throw new InvalidOperationException("The operation is not support");
+    }
+}
+
+double PerformAddition(XElement operationElement)
+{
+    var operands = operationElement.Descendants().Where(e => e.Name.LocalName == "Operand").Select(e => Convert.ToDouble(e.Attribute("quantity").Value));
+    return operands.Sum();
+}
+
+double PerformMultiplication(XElement operationElement)
+{
+     var operands = operationElement.Descendants().Where(e => e.Name.LocalName == "Operand").Select(e => Convert.ToDouble(e.Attribute("quantity").Value));
+    return operands.Aggregate(1.0, (accumulate, value) => accumulate * value);
+}
