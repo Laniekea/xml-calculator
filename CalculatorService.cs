@@ -17,7 +17,9 @@ namespace XMLCalculator
         {
             XDocument xmlDocument = XDocument.Parse(xml);
             var operation = xmlDocument.Descendants().FirstOrDefault(e => e.Name.LocalName == "Operation");
-            return ProcessOperation(operation);
+            double result = ProcessOperation(operation);
+            
+            return result;
         }
 
         private double ProcessOperation(XElement operationElement)

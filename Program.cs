@@ -24,7 +24,7 @@ app.MapPost("/calculate", (string xml, CalculatorService calculatorService) =>
 {
     try {
         var result = calculatorService.CalculateFromXml(xml);
-        return Results.Ok(new { Result = result });    
+        return Results.Ok(new { Value = result, Unit = "cm"  });    
     }
     catch (Exception ex) {
         return Results.BadRequest(new { Message = ex.Message });
