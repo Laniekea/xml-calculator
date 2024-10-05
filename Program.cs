@@ -1,6 +1,7 @@
 using Swashbuckle.AspNetCore.SwaggerUI;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using XMLCalculator;
 
 var builder = WebApplication.CreateBuilder(args);
 
