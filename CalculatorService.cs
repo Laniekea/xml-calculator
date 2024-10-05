@@ -6,6 +6,13 @@ namespace XMLCalculator
 {
     public class CalculatorService
     {
+        private readonly Dictionary<string, double> _centimeterScale = new Dictionary<string, double>
+        {
+            { "cm", 1.0 }, // maintain cm to cm
+            { "m", 100.0 }, // standardize meters to centimeter
+            { "centimeters", 1.0 }, // maintain cm to cm
+            { "meters", 100.0 } // standardize meters to centimeter
+        };
         public double CalculateFromXml(string xml)
         {
             XDocument xmlDocument = XDocument.Parse(xml);
@@ -30,14 +37,27 @@ namespace XMLCalculator
 
         private double PerformAddition(XElement operationElement)
         {
-            var operands = operationElement.Descendants().Where(e => e.Name.LocalName == "Operand").Select(e => Convert.ToDouble(e.Attribute("quantity").Value));
+            var operands = operationElement.Descendants().Where(e => e.Name.LocalName == "Operand").Select(e => ToCentimeter(e)).ToArray();
             return operands.Sum();
         }
 
         private double PerformMultiplication(XElement operationElement)
         {
-            var operands = operationElement.Descendants().Where(e => e.Name.LocalName == "Operand").Select(e => Convert.ToDouble(e.Attribute("quantity").Value));
+            var operands = operationElement.Descendants().Where(e => e.Name.LocalName == "Operand").Select(e => ToCentimeter(e)).ToArray();
             return operands.Aggregate(1.0, (accumulate, value) => accumulate * value);
+        }
+
+        private double ToCentimeter(XElement operandElement)
+        {
+            string unit = operandElement.Attribute("unit").Value;
+            double quantity = Convert.ToDouble(operandElement.Attribute("quantity").Value);
+
+            if (_centimeterScale.TryGetValue(unit, out double centimeterScale))
+            {
+                return quantity * centimeterScale; // convert meter to centimeter by multiplying with the scale
+            }
+
+            throw new InvalidOperationException($"The unit: {unit} is not supported for conversion");
         }
     }
 
