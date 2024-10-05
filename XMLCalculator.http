@@ -1,0 +1,6 @@
+@XMLCalculator_HostAddress = http://localhost:5226
+
+GET {{XMLCalculator_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
